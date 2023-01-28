@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 import { CreateUserDto } from "./dtos/create_user.dto";
 import { LoginUserDto } from "./dtos/login_user.dto";
 import { UserWithTokenDto } from "./dtos/user-with-token.dto";
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { ExceptionDto } from "./dtos/exception.dto";
 import { ClassValidatorException } from "./dtos/class-validator-exception.dto";
 
@@ -22,6 +22,7 @@ export class UsersController {
 
     @ApiBadRequestResponse({ type: ClassValidatorException })
     @ApiUnauthorizedResponse({ type: ExceptionDto })
+    @ApiOkResponse({ type: UserWithTokenDto })
     @HttpCode(200)
     @Post('/signin')
     async loginUser(@Body() loginUserDto: LoginUserDto): Promise<UserWithTokenDto> {
