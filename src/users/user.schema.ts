@@ -50,6 +50,13 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User)
 
+UserSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
+    delete userObject.password;
+    return userObject;
+};
+
 UserSchema.pre<UserDocument>('save', async function (next) {
     const user = this;
     if (user.isModified('password')) {

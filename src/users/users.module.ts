@@ -4,6 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema';
 import { UsersController } from './users.controller';
 import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { JWTStrategy } from './jwt.strategy';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -11,8 +14,17 @@ import { AuthService } from './auth.service';
       name: User.name,
       schema: UserSchema
     }
-  ])],
+  ]),
+  PassportModule.register({ defaultStrategy: 'jwt' }),
+  JwtModule.register({
+    secret: "jjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
+    signOptions: {
+      expiresIn: 86400,
+    }
+  })
+  ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService]
+  providers: [UsersService, AuthService, JWTStrategy],
+  exports: [JWTStrategy, PassportModule]
 })
 export class UsersModule { }
