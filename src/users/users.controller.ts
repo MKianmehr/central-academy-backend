@@ -29,4 +29,5 @@ export class UsersController {
         const user = await this.authService.signIn(loginUserDto)
         return user
     }
+
 }
