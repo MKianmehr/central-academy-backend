@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class ClassValidatorException {
+export class ClassValidatorExceptionDto {
 
     @ApiProperty()
     statusCode: number;

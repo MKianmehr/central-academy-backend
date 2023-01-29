@@ -21,7 +21,7 @@ export class AuthService {
 
         const newUser = await this.usersService.create(createUserDto)
         const payLoad: JWTPayload = { _id: newUser._id.toString() }
-        const accessToken: string = await this.jwtService.sign(payLoad)
+        const accessToken: string = await this.jwtService.signAsync(payLoad)
         return { user: newUser, accessToken }
     }
 
@@ -31,7 +31,7 @@ export class AuthService {
 
         if (user && await bcrypt.compare(password, user.password)) {
             const payLoad: JWTPayload = { _id: user._id.toString() }
-            const accessToken: string = await this.jwtService.sign(payLoad)
+            const accessToken: string = await this.jwtService.signAsync(payLoad)
             return { user, accessToken }
         }
         throw new UnauthorizedException('Please check your login credentials')

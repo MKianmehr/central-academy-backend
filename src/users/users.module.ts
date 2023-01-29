@@ -5,8 +5,7 @@ import { User, UserSchema } from './user.schema';
 import { UsersController } from './users.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { JWTStrategy } from './jwt.strategy';
+import { AdminGuard } from './guards/admin.guard';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -15,7 +14,6 @@ import { JWTStrategy } from './jwt.strategy';
       schema: UserSchema
     }
   ]),
-  PassportModule.register({ defaultStrategy: 'jwt' }),
   JwtModule.register({
     secret: "jjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
     signOptions: {
@@ -24,7 +22,7 @@ import { JWTStrategy } from './jwt.strategy';
   })
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService, JWTStrategy],
-  exports: [JWTStrategy, PassportModule]
+  providers: [UsersService, AuthService, AdminGuard],
+  exports: []
 })
 export class UsersModule { }

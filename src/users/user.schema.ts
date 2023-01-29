@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 
 export type UserDocument = HydratedDocument<User>
 
-enum Role {
+export enum Role {
     Subscriber = 'subscriber',
     Instructor = 'instructor',
     Admin = 'admin'
