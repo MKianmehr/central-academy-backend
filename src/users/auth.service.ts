@@ -4,8 +4,9 @@ import { CreateUserDto } from './dtos/create_user.dto';
 import { LoginUserDto } from './dtos/login_user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserWithTokenDto } from './dtos/user-with-token.dto';
+import { UserWithTokenInterface } from './interfaces/user-with-token.interface';
 import { JWTPayload } from './interfaces/jwt-payload.interface';
+import { UserDocument } from './user.schema';
 
 
 @Injectable()
@@ -15,7 +16,7 @@ export class AuthService {
         private jwtService: JwtService,
     ) { }
 
-    async signUp(createUserDto: CreateUserDto): Promise<UserWithTokenDto> {
+    async signUp(createUserDto: CreateUserDto): Promise<UserWithTokenInterface> {
         const user = await this.usersService.findOne(createUserDto.email)
         if (user) throw new ConflictException('email in use')
 
@@ -25,7 +26,7 @@ export class AuthService {
         return { user: newUser, accessToken }
     }
 
-    async signIn(loginUserDto: LoginUserDto): Promise<UserWithTokenDto> {
+    async signIn(loginUserDto: LoginUserDto): Promise<UserWithTokenInterface> {
         const { email, password } = loginUserDto
         const user = await this.usersService.findOne(email)
 
@@ -35,5 +36,15 @@ export class AuthService {
             return { user, accessToken }
         }
         throw new UnauthorizedException('Please check your login credentials')
+    }
+
+    async validateUserByToken(token: string): Promise<UserDocument> {
+        try {
+            const payLoad: JWTPayload = await this.jwtService.verifyAsync(token)
+            const user = await this.usersService.findById(payLoad._id)
+            return user
+        } catch (e) {
+            throw new UnauthorizedException('Please check your login credentials')
+        }
     }
 }

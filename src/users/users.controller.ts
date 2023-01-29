@@ -1,41 +1,44 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, Session } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "./dtos/create_user.dto";
 import { LoginUserDto } from "./dtos/login_user.dto";
-import { UserWithTokenDto } from "./dtos/user-with-token.dto";
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { NestExceptionDto } from "./dtos/nest-exception.dto";
 import { ClassValidatorExceptionDto } from "./dtos/class-validator-exception.dto";
-import { GetUser } from "./decorators/current-user.decorator";
-import { UserGuard } from "./guards/user.guard";
+import { User } from "./user.schema";
+import { UserDto } from "./dtos/user.dto";
+import { SignOutDto } from "./dtos/signout.dto";
 
 @Controller('auth')
 export class UsersController {
     constructor(private authService: AuthService) { }
 
     @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
-    @ApiCreatedResponse({ type: UserWithTokenDto })
+    @ApiCreatedResponse({ type: UserDto })
     @ApiConflictResponse({ type: NestExceptionDto })
     @Post('/signup')
-    async createUser(@Body() createUserDto: CreateUserDto): Promise<UserWithTokenDto> {
-        const user = await this.authService.signUp(createUserDto)
-        return user
+    async createUser(@Body() createUserDto: CreateUserDto, @Session() session: any): Promise<User> {
+        const userWithToken = await this.authService.signUp(createUserDto)
+        session.token = userWithToken.accessToken
+        return userWithToken.user
     }
 
     @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
     @ApiUnauthorizedResponse({ type: NestExceptionDto })
-    @ApiOkResponse({ type: UserWithTokenDto })
+    @ApiOkResponse({ type: UserDto })
     @HttpCode(200)
     @Post('/signin')
-    async loginUser(@Body() loginUserDto: LoginUserDto): Promise<UserWithTokenDto> {
-        const user = await this.authService.signIn(loginUserDto)
-        return user
+    async loginUser(@Body() loginUserDto: LoginUserDto, @Session() session: any): Promise<User> {
+        const userWithToken = await this.authService.signIn(loginUserDto)
+        session.token = userWithToken.accessToken
+        return userWithToken.user
     }
 
-    @Get('/test')
-    @UseGuards(UserGuard)
-    async test(@GetUser() user) {
-        console.log("req", user)
+    @ApiOkResponse({ type: SignOutDto })
+    @Post('/signout')
+    signOut(@Session() session: any): SignOutDto {
+        session = session.token = null
+        return { success: true }
     }
 
 }
