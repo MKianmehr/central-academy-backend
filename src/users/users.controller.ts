@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, Session } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Session, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "./dtos/create_user.dto";
 import { LoginUserDto } from "./dtos/login_user.dto";
@@ -8,6 +8,8 @@ import { ClassValidatorExceptionDto } from "./dtos/class-validator-exception.dto
 import { User } from "./user.schema";
 import { UserDto } from "./dtos/user.dto";
 import { SignOutDto } from "./dtos/signout.dto";
+import { UserGuard } from "./guards/user.guard";
+import { GetUser } from "./decorators/current-user.decorator";
 
 @Controller('auth')
 export class UsersController {
@@ -37,8 +39,21 @@ export class UsersController {
     @ApiOkResponse({ type: SignOutDto })
     @Post('/signout')
     signOut(@Session() session: any): SignOutDto {
-        session = session.token = null
+        session.token = null
         return { success: true }
     }
+
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiOkResponse({ type: UserDto })
+    @UseGuards(UserGuard)
+    @Get('/whoami')
+    whoAmI(@GetUser() user: User): User {
+        return user
+    }
+
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @UseGuards(UserGuard)
+    @Get('/isloggedin')
+    isLoggedIn() { }
 
 }

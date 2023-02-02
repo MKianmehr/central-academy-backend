@@ -9,6 +9,7 @@ async function bootstrap() {
   app.use(cookieSession({
     keys: ["hgbfsdcafgh"],
     httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
     // secure: true,
     // signed: false,
   }))
