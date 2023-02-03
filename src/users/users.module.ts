@@ -15,7 +15,7 @@ import { AdminGuard } from './guards/admin.guard';
     }
   ]),
   JwtModule.register({
-    secret: "jjjjjjjjjjjjjjjjjjjjjjjjjjjjj",
+    secret: process.env.JWT_KEY,
     signOptions: {
       expiresIn: 86400,
     }

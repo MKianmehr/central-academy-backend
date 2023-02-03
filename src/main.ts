@@ -7,7 +7,7 @@ const cookieSession = require('cookie-session')
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieSession({
-    keys: ["hgbfsdcafgh"],
+    keys: [process.env.COOKIE_SESSION_KEY],
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
     // secure: true,
@@ -25,6 +25,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1', app, document);
-  await app.listen(3000);
+  await app.listen(process.env.PORT);
 }
 bootstrap();
