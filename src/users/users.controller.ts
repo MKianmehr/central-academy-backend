@@ -78,8 +78,12 @@ export class UsersController {
     @HttpCode(200)
     @ApiNotFoundResponse({ type: NestExceptionDto })
     @Post('/email-password-change/:resetcode')
-    async emailPasswordChange(@Body() body: EmailPasswordChangeDto, @Param('resetcode') resetCode: string) {
-        return this.authService.emailPasswordChange(resetCode, body.password)
+    async emailPasswordChange(@Body() body: EmailPasswordChangeDto, @Param('resetcode') resetCode: string, @Session() session: any) {
+        const res = await this.authService.emailPasswordChange(resetCode, body.password)
+        session.token = res.accessToken
+        delete res.accessToken
+        const resultToSend = res
+        return resultToSend
     }
 
 }

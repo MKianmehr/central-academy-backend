@@ -73,13 +73,15 @@ export class AuthService {
     }
 
     async emailPasswordChange(resetCode: string, password: string) {
-        const payLoad: JWTPayload = await this.jwtService.verifyAsync(resetCode)
-        const user = await this.usersService.findById(payLoad._id)
+        const { _id }: JWTPayload = await this.jwtService.verifyAsync(resetCode)
+        const user = await this.usersService.findById(_id)
         if (!user) throw new NotFoundException("User not found.")
         if (user.passwordResetCode !== resetCode) throw new NotFoundException("Incorrect reset code")
         user.password = password;
         user.passwordResetCode = ""
+        const payLoad: JWTPayload = { _id: user._id.toString() }
+        const accessToken: string = await this.jwtService.signAsync(payLoad)
         await user.save()
-        return { success: true, message: "Password successfully changed" }
+        return { success: true, message: "Password successfully changed", user, accessToken }
     }
 }
