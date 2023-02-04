@@ -55,6 +55,9 @@ export class User {
     @Prop({ type: {}, default: {} })
     stripeSession: object;
 
+    @Prop({ default: "" })
+    passwordResetCode: string;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)
@@ -63,6 +66,7 @@ UserSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
     delete userObject.password;
+    delete userObject.passwordResetCode;
     return userObject;
 };
 

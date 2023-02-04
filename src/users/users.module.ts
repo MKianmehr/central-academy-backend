@@ -6,6 +6,7 @@ import { UsersController } from './users.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AWSService } from 'src/aws/aws.service';
 
 
 @Module({
@@ -28,7 +29,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     })
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService],
+  providers: [UsersService, AuthService, AWSService],
 })
 export class UsersModule { }
 

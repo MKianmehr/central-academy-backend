@@ -1,8 +1,8 @@
-import { Body, Controller, Get, HttpCode, Post, Session, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, Post, Session, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "./dtos/create_user.dto";
 import { LoginUserDto } from "./dtos/login_user.dto";
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { NestExceptionDto } from "./dtos/nest-exception.dto";
 import { ClassValidatorExceptionDto } from "./dtos/class-validator-exception.dto";
 import { User } from "./user.schema";
@@ -10,10 +10,17 @@ import { UserDto } from "./dtos/user.dto";
 import { SignOutDto } from "./dtos/signout.dto";
 import { UserGuard } from "./guards/user.guard";
 import { GetUser } from "./decorators/current-user.decorator";
+import { ForgetPasswordDto } from "./dtos/forget-password.dto";
+import { ForgetPasswordResDto } from "./dtos/forget-password-res.dto";
+import { EmailPasswordChangeDto } from "./dtos/email-pass-change.dto";
+import { EmailPasswordChangeResDto } from "./dtos/email-pass-change-res.dto";
+
 
 @Controller('auth')
 export class UsersController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+    ) { }
 
     @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
     @ApiCreatedResponse({ type: UserDto })
@@ -37,6 +44,7 @@ export class UsersController {
     }
 
     @ApiOkResponse({ type: SignOutDto })
+    @HttpCode(200)
     @Post('/signout')
     signOut(@Session() session: any): SignOutDto {
         session.token = null
@@ -55,5 +63,23 @@ export class UsersController {
     @UseGuards(UserGuard)
     @Get('/isloggedin')
     isLoggedIn() { }
+
+
+    @ApiBadRequestResponse({ type: NestExceptionDto })
+    @ApiOkResponse({ type: ForgetPasswordResDto })
+    @HttpCode(200)
+    @Post('/forget-password')
+    async forgetPassword(@Body() body: ForgetPasswordDto) {
+        return this.authService.forgetPassword(body.email)
+    }
+
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @ApiOkResponse({ type: EmailPasswordChangeResDto })
+    @HttpCode(200)
+    @ApiNotFoundResponse({ type: NestExceptionDto })
+    @Post('/email-password-change/:resetcode')
+    async emailPasswordChange(@Body() body: EmailPasswordChangeDto, @Param('resetcode') resetCode: string) {
+        return this.authService.emailPasswordChange(resetCode, body.password)
+    }
 
 }

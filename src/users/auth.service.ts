@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { LoginUserDto } from './dtos/login_user.dto';
@@ -7,6 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { UserWithTokenInterface } from './interfaces/user-with-token.interface';
 import { JWTPayload } from './interfaces/jwt-payload.interface';
 import { UserDocument } from './user.schema';
+import { AWSService } from 'src/aws/aws.service';
+import { ConfigService } from '@nestjs/config';
+
 
 
 @Injectable()
@@ -14,6 +17,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        private awsService: AWSService,
+        private configService: ConfigService,
     ) { }
 
     async signUp(createUserDto: CreateUserDto): Promise<UserWithTokenInterface> {
@@ -46,5 +51,35 @@ export class AuthService {
         } catch (e) {
             throw new UnauthorizedException('Please check your login credentials')
         }
+    }
+
+    async forgetPassword(email: string) {
+        const user = await this.usersService.findOne(email)
+        if (!user) {
+            throw new BadRequestException("Email not found. Please register or enter a valid email")
+        }
+        const payLoad: JWTPayload = { _id: user._id.toString() }
+        const resetCode: string = await this.jwtService.signAsync(payLoad, { expiresIn: '24h' })
+        user.passwordResetCode = resetCode
+        await user.save()
+        const domain = this.configService.get("CLIENT_DOMAIN")
+        const url = `${domain}/user/email-password-change?reset_code=${resetCode}`
+        try {
+            this.awsService.sendEmail(email, `Hi ${user.name ? user.name : ""}`, url)
+            return { success: true, message: "Reset password email sent" }
+        } catch (e) {
+            throw new ServiceUnavailableException("Please try again later")
+        }
+    }
+
+    async emailPasswordChange(resetCode: string, password: string) {
+        const payLoad: JWTPayload = await this.jwtService.verifyAsync(resetCode)
+        const user = await this.usersService.findById(payLoad._id)
+        if (!user) throw new NotFoundException("User not found.")
+        if (user.passwordResetCode !== resetCode) throw new NotFoundException("Incorrect reset code")
+        user.password = password;
+        user.passwordResetCode = ""
+        await user.save()
+        return { success: true, message: "Password successfully changed" }
     }
 }
