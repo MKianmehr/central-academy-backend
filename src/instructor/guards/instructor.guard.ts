@@ -5,11 +5,11 @@ import {
     UnauthorizedException,
     Session
 } from '@nestjs/common';
-import { Role } from '../user.schema';
-import { AuthService } from '../auth.service';
+import { Role } from '../../users/user.schema';
+import { AuthService } from '../../users/auth.service';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class InstructorGuard implements CanActivate {
     constructor(
         private authService: AuthService,
     ) { }
@@ -22,6 +22,6 @@ export class AdminGuard implements CanActivate {
         request.user = user
         const roles = user.role
 
-        return roles.includes(Role.Admin)
+        return roles.includes(Role.Instructor)
     }
 }

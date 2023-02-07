@@ -30,6 +30,7 @@ import { AWSService } from 'src/aws/aws.service';
   ],
   controllers: [UsersController],
   providers: [UsersService, AuthService, AWSService],
+  exports: [UsersService, AuthService]
 })
 export class UsersModule { }
 

@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AwsSdkModule } from 'nest-aws-sdk';
 import { S3, SES } from 'aws-sdk';
 import { AWSModule } from './aws/aws.module';
+import { InstructorModule } from './instructor/instructor.module';
 
 
 
@@ -28,6 +29,7 @@ import { AWSModule } from './aws/aws.module';
       services: [S3, SES],
     }),
     AWSModule,
+    InstructorModule,
   ],
 })
 export class AppModule { }
