@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserWithTokenInterface } from './interfaces/user-with-token.interface';
 import { JWTPayload } from './interfaces/jwt-payload.interface';
-import { UserDocument } from './user.schema';
+import { Role, UserDocument } from './user.schema';
 import { AWSService } from 'src/aws/aws.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -84,4 +84,18 @@ export class AuthService {
         await user.save()
         return { success: true, message: "Password successfully changed", user, accessToken }
     }
+
+    async becomeInstructor(user: UserDocument): Promise<{ success: boolean; message: string }> {
+        const isInstructor = user.role.some((role) => {
+            return role === Role.Instructor;
+        })
+        if (isInstructor) {
+            throw new ConflictException("you are already instructor")
+        }
+        user.role.push(Role.Instructor)
+        await user.save()
+        return { success: true, message: "You are now an instructor! Congratulations!" }
+    }
+
+    async isInstructor() { }
 }

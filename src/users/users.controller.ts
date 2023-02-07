@@ -5,7 +5,7 @@ import { LoginUserDto } from "./dtos/login_user.dto";
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { NestExceptionDto } from "./dtos/nest-exception.dto";
 import { ClassValidatorExceptionDto } from "./dtos/class-validator-exception.dto";
-import { User } from "./user.schema";
+import { User, UserDocument } from "./user.schema";
 import { UserDto } from "./dtos/user.dto";
 import { SignOutDto } from "./dtos/signout.dto";
 import { UserGuard } from "./guards/user.guard";
@@ -14,6 +14,8 @@ import { ForgetPasswordDto } from "./dtos/forget-password.dto";
 import { ForgetPasswordResDto } from "./dtos/forget-password-res.dto";
 import { EmailPasswordChangeDto } from "./dtos/email-pass-change.dto";
 import { EmailPasswordChangeResDto } from "./dtos/email-pass-change-res.dto";
+import { InstructorGuard } from "src/instructor/guards/instructor.guard";
+import { BecomeInstructorResDto } from "./dtos/become-instructor-res.dto";
 
 
 @Controller('auth')
@@ -85,5 +87,20 @@ export class UsersController {
         const resultToSend = res
         return resultToSend
     }
+
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiConflictResponse({ type: NestExceptionDto })
+    @ApiCreatedResponse({ type: BecomeInstructorResDto })
+    @UseGuards(UserGuard)
+    @Post('/become-instructor')
+    async becomeInstructor(@GetUser() user: UserDocument) {
+        return this.authService.becomeInstructor(user)
+    }
+
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiOkResponse()
+    @UseGuards(InstructorGuard)
+    @Get('/is-instructor')
+    isInstructor() { }
 
 }
