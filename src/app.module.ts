@@ -6,6 +6,7 @@ import { AwsSdkModule } from 'nest-aws-sdk';
 import { S3, SES } from 'aws-sdk';
 import { AWSModule } from './aws/aws.module';
 import { InstructorModule } from './instructor/instructor.module';
+import { CourseModule } from './course/course.module';
 
 
 
@@ -30,6 +31,7 @@ import { InstructorModule } from './instructor/instructor.module';
     }),
     AWSModule,
     InstructorModule,
+    CourseModule,
   ],
 })
 export class AppModule { }

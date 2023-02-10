@@ -36,7 +36,8 @@
     "mongoose": "^6.9.0",
     "nest-aws-sdk": "^3.0.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "slugify": "^1.6.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
