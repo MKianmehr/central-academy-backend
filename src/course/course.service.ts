@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Course, CourseDocument, _Class } from './course.schema';
@@ -38,9 +38,16 @@ export class CourseService {
         const index = createLessonDto.index
         delete createLessonDto.courseId
         delete createLessonDto.index
+        try {
+            course.lessons.splice(index, 0, { ...createLessonDto, slug: createLessonDto.title })
+            await course.save()
+            return course
+        } catch (e) {
+            if (e.name === 'ValidationError') {
+                throw new BadRequestException("Please fill out the form correctly to ensure accurate processing.")
+            }
+            throw new InternalServerErrorException('sth went wrong')
+        }
 
-        course.lessons.splice(index, 0, { ...createLessonDto, slug: createLessonDto.title })
-        await course.save()
-        return course
     }
 }
