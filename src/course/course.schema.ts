@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-const slugify = require('slugify')
+import slugify from "slugify";
 
 
 
@@ -19,7 +19,7 @@ export enum _Class {
 
 export enum _type {
     Quiz = "quiz",
-    CodingExercise = "coding-exercise"
+    CodingExercise = "coding-exercise",
 }
 
 export enum AssetType {
@@ -40,7 +40,7 @@ export class Asset {
 
     @ApiProperty()
     @Prop({ trim: true, enum: AssetType })
-    asset_type?: AssetType;
+    asset_type: AssetType;
 
 
     @ApiProperty()
@@ -145,7 +145,7 @@ export const LessonSchema = SchemaFactory.createForClass(Lesson)
 export class Course {
 
     @ApiProperty()
-    @Prop({ trim: true, minlength: 3, maxlength: 320, required: true, unique: true })
+    @Prop({ trim: true, minlength: 3, maxlength: 60, required: true, unique: true })
     name: string;
 
     @ApiProperty()
@@ -191,7 +191,6 @@ export const CourseSchema = SchemaFactory.createForClass(Course)
 CourseSchema.pre<CourseDocument>('save', async function (next) {
     const course = this;
     if (course.isModified('slug')) {
-        console.log(slugify(course.slug.toLowerCase()), "slugify(course.slug.toLowerCase())")
         course.slug = slugify(course.slug.toLowerCase())
     }
     next();
@@ -200,7 +199,6 @@ CourseSchema.pre<CourseDocument>('save', async function (next) {
 LessonSchema.pre<LessonDocument>('save', async function (next) {
     const lesson = this;
     if (lesson.isModified('slug')) {
-        console.log(slugify(lesson.slug.toLowerCase()), "slugify(course.slug.toLowerCase())")
         lesson.slug = slugify(lesson.slug.toLowerCase())
     }
     next();

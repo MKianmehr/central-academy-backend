@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import * as bcrypt from 'bcrypt';
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -57,6 +57,9 @@ export class User {
 
     @Prop({ default: "" })
     passwordResetCode: string;
+
+    @Prop({ type: [Types.ObjectId], ref: "Course" })
+    courses: Types.ObjectId[]
 
 }
 

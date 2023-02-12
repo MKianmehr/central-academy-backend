@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dtos/create_user.dto';
 
 @Injectable()
@@ -28,5 +28,16 @@ export class UsersService {
         return user
     }
 
+    async getCourses(_id: Types.ObjectId, skip: number, limit?: number) {
+        const user = await (await this.userModel.findById(_id)).populate({
+            path: "courses",
+            options: {
+                limit: limit ? limit : 10,
+                skip,
+                sort: { updatedAt: -1 }
+            }
+        })
+        return user.courses
+    }
 
 }

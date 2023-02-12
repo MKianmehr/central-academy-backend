@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsString, MinLength, IsOptional, MaxLength, IsNumber } from "class-validator";
 import { _Class, _type } from "../course.schema";
 
-export class CreateLessonDto {
+export class AddLessonDto {
 
     @ApiProperty()
     @IsString()
