@@ -3,6 +3,7 @@ import { InjectAwsService } from 'nest-aws-sdk';
 import { S3, SES } from 'aws-sdk';
 import { template } from './templates/reset-password.template'
 import { SESParams } from './ses.params';
+import { S3PARAMS } from './s3.params';
 
 
 @Injectable()
@@ -24,5 +25,18 @@ export class AWSService {
             academyMessage: "Delivered by Central Academy"
         })
         const response = await this.ses.sendEmail(SESParams(toAddress, html)).promise()
+    }
+
+    async sendImage(image: string) {
+        const base64Data = Buffer.from(image.replace(/^data:image\/\w+;base64,/, ""),
+            "base64")
+
+        const type = image.split(";")[0].split("/")[1]
+        try {
+            const res = await this.s3.upload(S3PARAMS(type, base64Data)).promise()
+            return res
+        } catch (e) {
+            return e
+        }
     }
 }

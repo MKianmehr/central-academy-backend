@@ -13,6 +13,9 @@ import { LessonWithId } from './dtos/lesson-with-id.dto';
 import { AddAssetDto } from './dtos/add-asset.dto';
 import { AssetWithId } from './dtos/asset-with-id.dto';
 import { GetCoursesQueryDto } from './dtos/get-courses-query.dto';
+import { UploadImageDto } from './dtos/upload-image.dto';
+import { GetCourseQueryDto } from './dtos/get-course.query.dto';
+import { UploadImageResDto } from './dtos/upload-image-res.dto';
 
 @Controller('course')
 export class CourseController {
@@ -59,5 +62,24 @@ export class CourseController {
     getCourses(@GetUser() user: UserDocument, @Query() query: GetCoursesQueryDto) {
         const { skip, limit } = query
         return this.courseService.getCourses(user, parseInt(skip), parseInt(limit))
+    }
+
+    @ApiCreatedResponse({ type: UploadImageResDto })
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @UseGuards(InstructorGuard)
+    @Post('/upload-image')
+    async courseImage(@Body() uploadImageDto: UploadImageDto, @GetUser() user: UserDocument) {
+        return this.courseService.uploadImage(uploadImageDto, user)
+    }
+
+    @ApiOkResponse({ type: CourseWithId })
+    @ApiForbiddenResponse({ type: NestExceptionDto })
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @UseGuards(InstructorGuard)
+    @Get('/get-course')
+    async getCourse(@Query() query: GetCourseQueryDto, @GetUser() user: UserDocument) {
+        return this.courseService.getCourse(query.courseId, user)
     }
 }

@@ -8,12 +8,15 @@ import { AddLessonDto } from './dtos/add-lesson.dto';
 import { AddAssetDto } from './dtos/add-asset.dto';
 import { UsersService } from 'src/users/users.service';
 import { LessonWithId } from './dtos/lesson-with-id.dto';
+import { UploadImageDto } from './dtos/upload-image.dto';
+import { AWSService } from 'src/aws/aws.service';
 
 @Injectable()
 export class CourseService {
     constructor(@InjectModel(Course.name)
     private courseModel: Model<CourseDocument>,
-        private userService: UsersService
+        private userService: UsersService,
+        private awsService: AWSService
     ) { }
 
     async findCourseById(courseId: string) {
@@ -73,6 +76,31 @@ export class CourseService {
         })
         const { _class, title, asset_type } = addAssetDto
         // lesson.asset = {_class, title, asset_type}
+    }
+
+    async uploadImage(uploadImageDto: UploadImageDto, user: UserDocument) {
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === uploadImageDto.courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+        try {
+            const res = await this.awsService.sendImage(uploadImageDto.image)
+            const course = await this.findCourseById(uploadImageDto.courseId.toString());
+            course.image = res
+            await course.save()
+            return { success: true, message: "Image successfully added" }
+        } catch (e) {
+            return { success: false, message: "" }
+        }
+    }
+
+    async getCourse(courseId: string, user: UserDocument) {
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+        const course = await this.findCourseById(courseId);
+        return course
     }
 
 

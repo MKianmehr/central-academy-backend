@@ -34,7 +34,7 @@ export class UsersService {
             options: {
                 limit: limit ? limit : 10,
                 skip,
-                sort: { updatedAt: -1 }
+                // sort: { updatedAt: -1 }
             }
         })
         return user.courses
