@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateCourseDto } from './dtos/create-course.dto';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { ClassValidatorExceptionDto } from 'src/users/dtos/class-validator-exception.dto';
 import { CourseWithId } from './dtos/course-with-id.dto';
 import { CourseService } from './course.service';
@@ -17,6 +17,8 @@ import { UploadImageDto } from './dtos/upload-image.dto';
 import { GetCourseQueryDto } from './dtos/get-course.query.dto';
 import { UploadImageResDto } from './dtos/upload-image-res.dto';
 import { EditLessonDto } from './dtos/edit-lesson.dto';
+import { ReOrderLessonsDto } from './dtos/reOrder-lesson.dto';
+import { DeleteLessonDto } from './dtos/delete-lesson.dto';
 
 @Controller('course')
 export class CourseController {
@@ -53,9 +55,31 @@ export class CourseController {
     @ApiConflictResponse({ type: NestExceptionDto })
     @ApiCreatedResponse({ type: LessonWithId })
     @UseGuards(InstructorGuard)
-    @Post('/edit-lesson')
+    @Patch('/edit-lesson')
     editLesson(@Body() body: EditLessonDto, @GetUser() user: UserDocument) {
         return this.courseService.editLesson(body, user)
+    }
+
+    @ApiNotFoundResponse({ type: NestExceptionDto })
+    @ApiForbiddenResponse({ type: NestExceptionDto })
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @UseGuards(InstructorGuard)
+    @Patch('/delete-lesson')
+    deleteLesson(@Body() body: DeleteLessonDto, @GetUser() user: UserDocument) {
+        return this.courseService.deleteLesson(body, user)
+    }
+
+
+    @ApiNotFoundResponse({ type: NestExceptionDto })
+    @ApiForbiddenResponse({ type: NestExceptionDto })
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiResponse({ type: CourseWithId })
+    @UseGuards(InstructorGuard)
+    @Patch('/reorder-lessons')
+    reOrderLessons(@Body() body: ReOrderLessonsDto, @GetUser() user: UserDocument) {
+        return this.courseService.reOrderLessons(body, user)
     }
 
     @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })

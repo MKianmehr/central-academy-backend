@@ -24,10 +24,4 @@ export class EditLessonDto {
     @ApiProperty()
     @IsString()
     lessonId: string;
-
-    @IsOptional()
-    @ApiProperty()
-    @IsNumber()
-    targetIndex?: number;
-
 }

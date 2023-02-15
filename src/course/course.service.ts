@@ -11,6 +11,8 @@ import { LessonWithId } from './dtos/lesson-with-id.dto';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { AWSService } from 'src/aws/aws.service';
 import { EditLessonDto } from './dtos/edit-lesson.dto';
+import { ReOrderLessonsDto } from './dtos/reOrder-lesson.dto';
+import { DeleteLessonDto } from './dtos/delete-lesson.dto';
 
 @Injectable()
 export class CourseService {
@@ -71,7 +73,7 @@ export class CourseService {
     }
 
     async editLesson(editLessonDto: EditLessonDto, user: UserDocument) {
-        const { courseId, lessonId, targetIndex, ...updatedFields } = editLessonDto
+        const { courseId, lessonId, ...updatedFields } = editLessonDto
         const isFind = user.courses.some((course) => {
             return course._id.toString() === courseId
         })
@@ -93,14 +95,43 @@ export class CourseService {
             lesson[field] = updatedFields[field]
         })
 
-        if (targetIndex) {
-            const itemToMoveIndex = course.lessons.indexOf(lesson)
-            const itemToMove = course.lessons.splice(itemToMoveIndex, 1)[0]
-            course.lessons.splice(targetIndex, 0, itemToMove)
-        }
         await course.save()
         return lesson
 
+    }
+
+    async deleteLesson(deleteLessonDto: DeleteLessonDto, user: UserDocument) {
+
+        const { index, courseId } = deleteLessonDto
+
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === courseId
+        })
+
+        if (!isFind) throw new ForbiddenException('')
+
+        const course = await this.findCourseById(courseId)
+        if (!course) {
+            throw new NotFoundException('')
+        }
+        course.lessons.splice(index, 1)
+        await course.save()
+        return { success: true, message: "lesson successfully deleted" }
+    }
+
+    async reOrderLessons(reOrderLessonsDto: ReOrderLessonsDto, user: UserDocument) {
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === reOrderLessonsDto.courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+        const course = await this.findCourseById(reOrderLessonsDto.courseId);
+
+        if (!course) {
+            throw new NotFoundException('')
+        }
+        course.lessons = reOrderLessonsDto.lessons
+        await course.save()
+        return course
     }
 
     async addAsset(addAssetDto: AddAssetDto, user: UserDocument) {
