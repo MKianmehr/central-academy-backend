@@ -10,6 +10,7 @@ import { UsersService } from 'src/users/users.service';
 import { LessonWithId } from './dtos/lesson-with-id.dto';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { AWSService } from 'src/aws/aws.service';
+import { EditLessonDto } from './dtos/edit-lesson.dto';
 
 @Injectable()
 export class CourseService {
@@ -39,12 +40,16 @@ export class CourseService {
     }
 
     async addLesson(addLessonDto: AddLessonDto, user: UserDocument) {
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === addLessonDto.courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+
         const course = await this.findCourseById(addLessonDto.courseId)
         if (!course) {
             throw new NotFoundException('')
-        } else if (course.instructor.toString() !== user._id.toString()) {
-            throw new ForbiddenException()
         }
+
         const found = course.lessons.some((lesson) => {
             return lesson.title === addLessonDto.title
         })
@@ -55,13 +60,46 @@ export class CourseService {
         try {
             course.lessons.splice(index, 0, { ...addLessonDto, slug: addLessonDto.title })
             await course.save()
-            return course
+            return course.lessons[index]
         } catch (e) {
             if (e.name === 'ValidationError') {
                 throw new BadRequestException("Please fill out the form correctly to ensure accurate processing.")
             }
             throw new InternalServerErrorException('sth went wrong')
         }
+
+    }
+
+    async editLesson(editLessonDto: EditLessonDto, user: UserDocument) {
+        const { courseId, lessonId, targetIndex, ...updatedFields } = editLessonDto
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+
+        const course = await this.findCourseById(courseId)
+        course.lessons as LessonWithId[]
+        if (!course) {
+            throw new NotFoundException('')
+        }
+        const lesson = (course.lessons as LessonWithId[]).find((lesson) => {
+            return lesson._id.toString() === lessonId
+        })
+        if (!lesson) {
+            throw new NotFoundException('')
+        }
+
+        Object.keys(updatedFields).forEach((field) => {
+            lesson[field] = updatedFields[field]
+        })
+
+        if (targetIndex) {
+            const itemToMoveIndex = course.lessons.indexOf(lesson)
+            const itemToMove = course.lessons.splice(itemToMoveIndex, 1)[0]
+            course.lessons.splice(targetIndex, 0, itemToMove)
+        }
+        await course.save()
+        return lesson
 
     }
 

@@ -16,6 +16,7 @@ import { GetCoursesQueryDto } from './dtos/get-courses-query.dto';
 import { UploadImageDto } from './dtos/upload-image.dto';
 import { GetCourseQueryDto } from './dtos/get-course.query.dto';
 import { UploadImageResDto } from './dtos/upload-image-res.dto';
+import { EditLessonDto } from './dtos/edit-lesson.dto';
 
 @Controller('course')
 export class CourseController {
@@ -43,6 +44,18 @@ export class CourseController {
     @Post('/add-lesson')
     addLesson(@Body() body: AddLessonDto, @GetUser() user: UserDocument) {
         return this.courseService.addLesson(body, user)
+    }
+
+    @ApiUnauthorizedResponse({ type: NestExceptionDto })
+    @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
+    @ApiNotFoundResponse({ type: NestExceptionDto })
+    @ApiForbiddenResponse({ type: NestExceptionDto })
+    @ApiConflictResponse({ type: NestExceptionDto })
+    @ApiCreatedResponse({ type: LessonWithId })
+    @UseGuards(InstructorGuard)
+    @Post('/edit-lesson')
+    editLesson(@Body() body: EditLessonDto, @GetUser() user: UserDocument) {
+        return this.courseService.editLesson(body, user)
     }
 
     @ApiBadRequestResponse({ type: ClassValidatorExceptionDto })
