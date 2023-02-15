@@ -13,6 +13,8 @@ import { AWSService } from 'src/aws/aws.service';
 import { EditLessonDto } from './dtos/edit-lesson.dto';
 import { ReOrderLessonsDto } from './dtos/reOrder-lesson.dto';
 import { DeleteLessonDto } from './dtos/delete-lesson.dto';
+import { RemoveImageDto } from './dtos/remove-image.dto';
+import { ImageDto } from 'src/aws/dtos/image.dto';
 
 @Injectable()
 export class CourseService {
@@ -152,15 +154,39 @@ export class CourseService {
             return course._id.toString() === uploadImageDto.courseId
         })
         if (!isFind) throw new ForbiddenException('')
+        const course = await this.findCourseById(uploadImageDto.courseId.toString());
+        if (Object.keys(course.image).length > 0) {
+            const removeImageDto: RemoveImageDto = { courseId: course._id.toString() }
+            const res = await this.removeImage(removeImageDto, user)
+        }
         try {
             const res = await this.awsService.sendImage(uploadImageDto.image)
-            const course = await this.findCourseById(uploadImageDto.courseId.toString());
             course.image = res
             await course.save()
             return { success: true, message: "Image successfully added" }
         } catch (e) {
             return { success: false, message: "" }
         }
+    }
+
+    async removeImage(removeImageDto: RemoveImageDto, user: UserDocument) {
+        const isFind = user.courses.some((course) => {
+            return course._id.toString() === removeImageDto.courseId
+        })
+        if (!isFind) throw new ForbiddenException('')
+        const course = await this.findCourseById(removeImageDto.courseId);
+        if (!course) {
+            throw new NotFoundException('')
+        }
+
+        try {
+            const res = await this.awsService.removeImage(course.image as ImageDto)
+            course.image = {}
+            await course.save()
+        } catch (e) {
+            throw new InternalServerErrorException('sth went wrong')
+        }
+
     }
 
     async getCourse(courseId: string, user: UserDocument) {

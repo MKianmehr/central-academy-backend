@@ -19,6 +19,7 @@ import { UploadImageResDto } from './dtos/upload-image-res.dto';
 import { EditLessonDto } from './dtos/edit-lesson.dto';
 import { ReOrderLessonsDto } from './dtos/reOrder-lesson.dto';
 import { DeleteLessonDto } from './dtos/delete-lesson.dto';
+import { RemoveImageDto } from './dtos/remove-image.dto';
 
 @Controller('course')
 export class CourseController {
@@ -108,6 +109,12 @@ export class CourseController {
     @Post('/upload-image')
     async courseImage(@Body() uploadImageDto: UploadImageDto, @GetUser() user: UserDocument) {
         return this.courseService.uploadImage(uploadImageDto, user)
+    }
+
+    @Patch('/remove-course-image')
+    @UseGuards(InstructorGuard)
+    async removeCourseImage(@Body() removeImageDto: RemoveImageDto, @GetUser() user: UserDocument) {
+        return this.courseService.removeImage(removeImageDto, user)
     }
 
     @ApiOkResponse({ type: CourseWithId })

@@ -4,6 +4,7 @@ import { S3, SES } from 'aws-sdk';
 import { template } from './templates/reset-password.template'
 import { SESParams } from './ses.params';
 import { S3PARAMS } from './s3.params';
+import { ImageDto } from './dtos/image.dto';
 
 
 @Injectable()
@@ -38,5 +39,9 @@ export class AWSService {
         } catch (e) {
             return e
         }
+    }
+
+    async removeImage(image: ImageDto) {
+        return await this.s3.deleteObject({ Bucket: image.Bucket, Key: image.Key }).promise()
     }
 }
