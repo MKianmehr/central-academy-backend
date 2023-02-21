@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CreateCourseDto } from './dtos/create-course.dto';
 import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { ClassValidatorExceptionDto } from 'src/users/dtos/class-validator-exception.dto';
@@ -20,11 +20,17 @@ import { EditLessonDto } from './dtos/edit-lesson.dto';
 import { ReOrderLessonsDto } from './dtos/reOrder-lesson.dto';
 import { DeleteLessonDto } from './dtos/delete-lesson.dto';
 import { RemoveImageDto } from './dtos/remove-image.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadVideoDto } from './dtos/upload-video.dto';
+import { AssetService } from './asset.service';
+import { Express } from 'express'
+import { Timeout } from '@nestjs/schedule';
 
 @Controller('course')
 export class CourseController {
     constructor(
-        private courseService: CourseService
+        private courseService: CourseService,
+        private assetService: AssetService,
     ) { }
 
     @ApiUnauthorizedResponse({ type: NestExceptionDto })
@@ -90,7 +96,7 @@ export class CourseController {
     @UseGuards(InstructorGuard)
     @Post('/add-asset')
     addAsset(@Body() body: AddAssetDto, @GetUser() user: UserDocument) {
-        return this.courseService.addAsset(body, user)
+        return this.assetService.addAsset(body, user)
     }
 
     @ApiOkResponse({ type: [CourseWithId] })
@@ -125,5 +131,14 @@ export class CourseController {
     @Get('/get-course')
     async getCourse(@Query() query: GetCourseQueryDto, @GetUser() user: UserDocument) {
         return this.courseService.getCourse(query.courseId, user)
+    }
+
+
+    @Timeout(500000)
+    @UseGuards(InstructorGuard)
+    @UseInterceptors(FileInterceptor('video'))
+    @Post('/video-upload')
+    async uploadVideo(@UploadedFile() video: Express.Multer.File, @Body() uploadVideoDto: UploadVideoDto, @GetUser() user: UserDocument) {
+        return this.assetService.uploadVideo(video, uploadVideoDto, user)
     }
 }

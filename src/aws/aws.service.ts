@@ -3,8 +3,10 @@ import { InjectAwsService } from 'nest-aws-sdk';
 import { S3, SES } from 'aws-sdk';
 import { template } from './templates/reset-password.template'
 import { SESParams } from './ses.params';
-import { S3PARAMS } from './s3.params';
+import { S3ImagePARAMS } from './s3-image.params';
 import { ImageDto } from './dtos/image.dto';
+import { Express } from 'express'
+import { S3VideoPARAMS } from './s3-video.params';
 
 
 @Injectable()
@@ -34,7 +36,7 @@ export class AWSService {
 
         const type = image.split(";")[0].split("/")[1]
         try {
-            const res = await this.s3.upload(S3PARAMS(type, base64Data)).promise()
+            const res = await this.s3.upload(S3ImagePARAMS(type, base64Data)).promise()
             return res
         } catch (e) {
             return e
@@ -43,5 +45,9 @@ export class AWSService {
 
     async removeImage(image: ImageDto) {
         return await this.s3.deleteObject({ Bucket: image.Bucket, Key: image.Key }).promise()
+    }
+
+    async uploadVideo(video: Express.Multer.File) {
+        return this.s3.upload(S3VideoPARAMS(video)).promise()
     }
 }

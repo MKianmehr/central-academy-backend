@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Course, CourseSchema } from './course.schema';
 import { UsersModule } from 'src/users/users.module';
 import { AWSService } from 'src/aws/aws.service';
+import { AssetService } from './asset.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { AWSService } from 'src/aws/aws.service';
     ]),
   ],
   controllers: [CourseController],
-  providers: [CourseService, AWSService]
+  providers: [CourseService, AWSService, AssetService]
 })
 export class CourseModule { }

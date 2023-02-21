@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 
-export const S3PARAMS = (type: string, base64Data: Buffer) => ({
+export const S3ImagePARAMS = (type: string, base64Data: Buffer) => ({
     Bucket: "c-academy",
     Key: `${nanoid()}.${type}`,
     Body: base64Data,

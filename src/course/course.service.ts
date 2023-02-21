@@ -136,19 +136,6 @@ export class CourseService {
         return course
     }
 
-    async addAsset(addAssetDto: AddAssetDto, user: UserDocument) {
-        const isFind = user.courses.some((course) => {
-            return course._id.toString() === addAssetDto.courseId
-        })
-        if (!isFind) throw new ForbiddenException('')
-        const course = await this.findCourseById(addAssetDto.courseId);
-        const lesson = (course.lessons as LessonWithId[]).find((lesson) => {
-            return lesson._id.toString() === addAssetDto.lessonId
-        })
-        const { _class, title, asset_type } = addAssetDto
-        // lesson.asset = {_class, title, asset_type}
-    }
-
     async uploadImage(uploadImageDto: UploadImageDto, user: UserDocument) {
         const isFind = user.courses.some((course) => {
             return course._id.toString() === uploadImageDto.courseId

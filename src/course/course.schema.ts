@@ -35,8 +35,8 @@ export class Asset {
     _class: _Class;
 
     @ApiProperty()
-    @Prop({ trim: true, minlength: 3, maxlength: 320, required: true })
-    title: string;
+    @Prop({ trim: true, minlength: 3, maxlength: 320 })
+    title?: string;
 
     @ApiProperty()
     @Prop({ trim: true, enum: AssetType })
@@ -45,23 +45,23 @@ export class Asset {
 
     @ApiProperty()
     @Prop({ type: {} })
-    thumbnail_url: {};
+    thumbnail_url?: {};
 
     @ApiProperty()
     @Prop({ type: {} })
-    source_url: {};
+    source_url?: {};
 
     @ApiProperty()
     @Prop({ trim: true })
-    content_summary: string;
+    content_summary?: string;
 
     @ApiProperty()
     @Prop()
-    time_estimation: number;
+    time_estimation?: number;
 
     @ApiProperty()
     @Prop({ type: [] })
-    processing_errors: []
+    processing_errors?: []
 }
 
 export const AssetSchema = SchemaFactory.createForClass(Asset)
